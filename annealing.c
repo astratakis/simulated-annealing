@@ -155,3 +155,11 @@ void reset(problem_t *problem)
         problem->graph.nodes[i] = rand() % 2;
     }
 }
+
+void state(problem_t *problem, char *string) {
+    memset(string, 0, problem->num_nodes);
+
+    for (unsigned int i=0; i<problem->num_nodes; i++) {
+        string[i] = 0x30 + problem->graph.nodes[i];
+    }
+}

@@ -26,6 +26,10 @@ int main()
     }
 
     problem_t problem = initialize_problem(h, J, n, 100.0, 1.0, 1.0, 1000);
-    evolve(&problem, 2);
+    
+    char *s = (char *)malloc(n);
+    state(&problem, s);
+    cout << "Current state: " << s << endl;
+
     return 0;
 }

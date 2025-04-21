@@ -35,6 +35,8 @@ extern "C"
 
     problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temperature, double cooling_rate, double min_temperature, uint32 max_iterations);
 
+    void state(problem_t *problem, char *string);
+
     void free_problem(problem_t *problem);
 
     void evolve(problem_t *problem, uint32 num_threads);
