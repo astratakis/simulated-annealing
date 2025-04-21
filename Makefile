@@ -5,7 +5,7 @@ NVCC     := nvcc
 
 # Flags
 CXXFLAGS := -O2 -std=c++11
-CFLAGS   := -O2 -Wall -Wextra -std=c11
+CFLAGS   := -O2 -Wall -Wextra -pthread -mrdseed -std=c11
 NVCCFLAGS:= -O2 -std=c++11
 
 # Target
