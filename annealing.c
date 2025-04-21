@@ -34,6 +34,8 @@ problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temp
     problem.graph.adj = J;
     problem.graph.bias = h;
 
+    problem.energy_history = (double *)malloc(max_iterations * sizeof(double));
+
     reset(&problem);
 
     return problem;
@@ -44,6 +46,7 @@ void free_problem(problem_t *problem)
     free(problem->graph.nodes);
     free(problem->graph.next);
     free(problem->best_state);
+    free(problem->energy_history);
 }
 
 void *worker(void *arg)
@@ -139,6 +142,7 @@ void reset(problem_t *problem)
     problem->best_energy = 0;
     memset(problem->best_state, 0, problem->num_nodes * sizeof(uint8));
     memset(problem->graph.next, 0, problem->num_nodes * sizeof(uint8));
+    memset(problem->energy_history, 0, problem->max_iterations * sizeof(double));
 
     unsigned int seed;
     int success = _rdseed32_step(&seed);

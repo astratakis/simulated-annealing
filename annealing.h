@@ -31,6 +31,7 @@ extern "C"
         double current_energy;
         double best_energy;
         uint8 *best_state;
+        double *energy_history;
     } problem_t;
 
     problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temperature, double cooling_rate, double min_temperature, uint32 max_iterations);

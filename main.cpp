@@ -29,7 +29,17 @@ int main()
     
     char *s = (char *)malloc(n);
     state(&problem, s);
-    cout << "Current state: " << s << endl;
+
+    // In this case we want to output the energy history
+    cout << n << endl;
+    cout << s << endl;
+    cout << problem.current_iteration << endl;
+    for (unsigned int i=0; i<problem.current_iteration; i++) {
+        cout << problem.energy_history[i] << endl;
+    }
+
+    free_problem(&problem);
+    free(s);
 
     return 0;
 }
