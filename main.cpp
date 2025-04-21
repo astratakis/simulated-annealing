@@ -26,5 +26,6 @@ int main()
     }
 
     problem_t problem = initialize_problem(h, J, n, 100.0, 1.0, 1.0, 1000);
+    evolve(&problem, 2);
     return 0;
 }
