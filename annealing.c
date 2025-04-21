@@ -21,8 +21,6 @@ problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temp
 
     problem.graph.nodes = (uint8 *)malloc(num_nodes * sizeof(uint8));
     problem.graph.next = (uint8 *)malloc(num_nodes * sizeof(uint8));
-    problem.graph.bias = (double *)malloc(num_nodes * sizeof(double));
-    problem.graph.adj = (double *)malloc(num_nodes * num_nodes * sizeof(double));
 
     problem.temperature = temperature;
     problem.cooling_rate = cooling_rate;
@@ -33,8 +31,8 @@ problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temp
     problem.best_energy = 0;
     problem.best_state = (uint8 *)malloc(num_nodes * sizeof(uint8));
 
-    memcpy(problem.graph.bias, h, num_nodes * sizeof(double));
-    memcpy(problem.graph.adj, J, num_nodes * num_nodes * sizeof(double));
+    problem.graph.adj = J;
+    problem.graph.bias = h;
 
     reset(&problem);
 
@@ -45,8 +43,6 @@ void free_problem(problem_t *problem)
 {
     free(problem->graph.nodes);
     free(problem->graph.next);
-    free(problem->graph.bias);
-    free(problem->graph.adj);
     free(problem->best_state);
 }
 
