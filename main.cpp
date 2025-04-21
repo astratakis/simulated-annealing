@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include "annealing.h"
 
 using namespace std;
 
@@ -23,5 +24,7 @@ int main()
             cin >> J[i * n + j];
         }
     }
+
+    problem_t problem = initialize_problem(h, J, n, 100.0, 1.0, 1.0, 1000);
     return 0;
 }

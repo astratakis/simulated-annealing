@@ -1,0 +1,40 @@
+# Compiler toolchains
+CC       := g++
+CC_C     := gcc
+NVCC     := nvcc
+
+# Flags
+CXXFLAGS := -O2 -std=c++11
+CFLAGS   := -O2 -Wall -Wextra -std=c11
+NVCCFLAGS:= -O2 -std=c++11
+
+# Target
+TARGET   := anneal
+
+# Object files
+OBJS     := main.o annealing.o annealing_cuda.o
+
+# Default rule
+all: $(TARGET)
+
+# Compile the C annealing host code
+annealing.o: annealing.c annealing.h
+	$(CC_C) $(CFLAGS) -c $< -o $@
+
+# Compile the C++ driver
+main.o: main.cpp annealing.h
+	$(CC) $(CXXFLAGS) -c $< -o $@
+
+# Compile the CUDA kernels
+annealing_cuda.o: annealing.cu annealing.h
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
+
+# Link everything with nvcc (so CUDA runtime is linked correctly)
+$(TARGET): $(OBJS)
+	$(NVCC) $(NVCCFLAGS) $^ -o $@
+
+# Clean up
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+.PHONY: all clean
