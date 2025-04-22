@@ -15,7 +15,7 @@ TARGET   := anneal
 OBJS     := main.o annealing.o annealing_cuda.o
 
 # Default rule
-all: $(TARGET)
+all: $(TARGET) specs
 
 # Compile the C annealing host code
 annealing.o: annealing.c annealing.h
@@ -33,8 +33,16 @@ annealing_cuda.o: annealing.cu annealing.h
 $(TARGET): $(OBJS)
 	$(NVCC) $(NVCCFLAGS) $^ -o $@
 
+# object for specs
+specs.o: specs.cu
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
+
+# final executable
+specs: specs.o
+	$(NVCC) $(NVCCFLAGS) $^ -o $@
+
 # Clean up
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) specs.o specs
 
 .PHONY: all clean
