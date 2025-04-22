@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
     int num_threads = 1;
     bool normalize = false;
     bool monitor = false;
+    bool to_file = false;
+    bool gpu = false;
     int gpu_blocks = 0;
     int gpu_threads = 0;
     int max_iter = 1000;
@@ -87,11 +89,13 @@ int main(int argc, char *argv[])
             break;
 
         case 'o':
+            to_file = true;
             output_file = optarg;
             break;
 
         case 'g':
             // parse two integers: blocks and threads per block
+            gpu = true;
             gpu_blocks = std::atoi(optarg);
             if (optind < argc && argv[optind][0] != '-')
             {
@@ -177,7 +181,44 @@ int main(int argc, char *argv[])
 
     free(Q);
 
-    print_ising(h, J, n);
+    if (normalize)
+    {
+        double max = 0.0;
+
+        for (unsigned int i = 0; i < n; i++)
+        {
+            for (unsigned int j = 0; j < n; j++)
+            {
+                max = std::max(max, std::abs(J[i * n + j]));
+            }
+        }
+        for (unsigned int i = 0; i < n; i++)
+        {
+            max = std::max(max, std::abs(h[i]));
+        }
+
+        for (unsigned int i = 0; i < n; i++)
+        {
+            for (unsigned int j = 0; j < n; j++)
+            {
+                J[i * n + j] /= max;
+            }
+        }
+        for (unsigned int i = 0; i < n; i++)
+        {
+            h[i] /= max;
+        }
+    }
+
+    problem_t problem = initialize_problem(h, J, n, 100.0, cooling_ratio, 1.0, max_iter);
+
+    if (gpu)
+    {
+    }
+    else
+    {
+        evolve(&problem, num_threads);
+    }
 
     free(h);
     free(J);
