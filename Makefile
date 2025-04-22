@@ -4,9 +4,9 @@ CC_C     := gcc
 NVCC     := nvcc
 
 # Flags
-CXXFLAGS := -O2 -std=c++11
-CFLAGS   := -O2 -Wall -Wextra -pthread -mrdseed -std=c11
-NVCCFLAGS:= -O2 -std=c++11
+CXXFLAGS := -O3 -std=c++11
+CFLAGS   := -O3 -Wall -Wextra -pthread -mrdseed -std=c11
+NVCCFLAGS:= -O3 -std=c++11
 
 # Target
 TARGET   := anneal

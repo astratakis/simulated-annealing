@@ -21,8 +21,6 @@ problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temp
 
     problem.graph.nodes = (uint8 *)malloc(num_nodes * sizeof(uint8));
     problem.graph.next = (uint8 *)malloc(num_nodes * sizeof(uint8));
-    problem.graph.bias = (double *)malloc(num_nodes * sizeof(double));
-    problem.graph.adj = (double *)malloc(num_nodes * num_nodes * sizeof(double));
 
     problem.temperature = temperature;
     problem.cooling_rate = cooling_rate;
@@ -33,8 +31,10 @@ problem_t initialize_problem(double *h, double *J, uint32 num_nodes, double temp
     problem.best_energy = 0;
     problem.best_state = (uint8 *)malloc(num_nodes * sizeof(uint8));
 
-    memcpy(problem.graph.bias, h, num_nodes * sizeof(double));
-    memcpy(problem.graph.adj, J, num_nodes * num_nodes * sizeof(double));
+    problem.graph.adj = J;
+    problem.graph.bias = h;
+
+    problem.energy_history = (double *)malloc(max_iterations * sizeof(double));
 
     reset(&problem);
 
@@ -45,9 +45,8 @@ void free_problem(problem_t *problem)
 {
     free(problem->graph.nodes);
     free(problem->graph.next);
-    free(problem->graph.bias);
-    free(problem->graph.adj);
     free(problem->best_state);
+    free(problem->energy_history);
 }
 
 void *worker(void *arg)
@@ -143,6 +142,7 @@ void reset(problem_t *problem)
     problem->best_energy = 0;
     memset(problem->best_state, 0, problem->num_nodes * sizeof(uint8));
     memset(problem->graph.next, 0, problem->num_nodes * sizeof(uint8));
+    memset(problem->energy_history, 0, problem->max_iterations * sizeof(double));
 
     unsigned int seed;
     int success = _rdseed32_step(&seed);
@@ -157,5 +157,13 @@ void reset(problem_t *problem)
     for (unsigned int i = 0; i < problem->num_nodes; i++)
     {
         problem->graph.nodes[i] = rand() % 2;
+    }
+}
+
+void state(problem_t *problem, char *string) {
+    memset(string, 0, problem->num_nodes);
+
+    for (unsigned int i=0; i<problem->num_nodes; i++) {
+        string[i] = 0x30 + problem->graph.nodes[i];
     }
 }
