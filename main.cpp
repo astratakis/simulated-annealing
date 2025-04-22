@@ -2,8 +2,25 @@
 #include <stdlib.h>
 #include <cstring>
 #include "annealing.h"
+#include <getopt.h>
 
 using namespace std;
+
+void print_help(const char *progname)
+{
+    std::cout << "Usage: " << progname << " [options]\n\n"
+              << "Options:\n"
+              << "  -h, --help                   Show this help message and exit\n"
+              << "  -f, --file <FILE_NAME>       Read QUBO matrix from file instead of stdin\n"
+              << "  -t, --threads <num_threads>  Number of threads to spawn\n"
+              << "  -n, --normalize              Normalize the Ising Hamiltonian\n"
+              << "  -o, --output <FILE_NAME>     Write output to specified file\n"
+              << "  -g, --gpu <blocks> <threads> Run on GPU with given blocks and threads\n"
+              << "  -m, --monitor                Monitor the process\n"
+              << "  -i, --iter <max_iter>        Maximum number of iterations\n"
+              << "  -r, --ratio <cooling_ratio>  Cooling ratio for annealing\n"
+              << std::endl;
+}
 
 void print_ising(double *h, double *J, unsigned int n)
 {
@@ -23,8 +40,89 @@ void print_ising(double *h, double *J, unsigned int n)
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+
+    std::string input_file;
+    std::string output_file;
+    int num_threads = 1;
+    bool normalize = false;
+    bool monitor = false;
+    int gpu_blocks = 0;
+    int gpu_threads = 0;
+    int max_iter = 1000;
+    double cooling_ratio = 0.95;
+
+    static struct option long_opts[] = {
+        {"help", no_argument, nullptr, 'h'},
+        {"file", required_argument, nullptr, 'f'},
+        {"threads", required_argument, nullptr, 't'},
+        {"normalize", no_argument, nullptr, 'n'},
+        {"output", required_argument, nullptr, 'o'},
+        {"gpu", required_argument, nullptr, 'g'},
+        {"monitor", no_argument, nullptr, 'm'},
+        {"iter", required_argument, nullptr, 'i'},
+        {"ratio", required_argument, nullptr, 'r'},
+        {nullptr, 0, nullptr, 0}};
+
+    int opt;
+    while ((opt = getopt_long(argc, argv, "hf:t:no:g:mi:r:", long_opts, nullptr)) != -1)
+    {
+        switch (opt)
+        {
+        case 'h':
+            print_help(argv[0]);
+            return 0;
+
+        case 'f':
+            input_file = optarg;
+            break;
+
+        case 't':
+            num_threads = std::atoi(optarg);
+            break;
+
+        case 'n':
+            normalize = true;
+            break;
+
+        case 'o':
+            output_file = optarg;
+            break;
+
+        case 'g':
+            // parse two integers: blocks and threads per block
+            gpu_blocks = std::atoi(optarg);
+            if (optind < argc && argv[optind][0] != '-')
+            {
+                gpu_threads = std::atoi(argv[optind++]);
+            }
+            else
+            {
+                std::cerr << "Error: --gpu requires two arguments.\n";
+                return 1;
+            }
+            break;
+
+        case 'm':
+            monitor = true;
+            break;
+
+        case 'i':
+            max_iter = std::atoi(optarg);
+            break;
+
+        case 'r':
+            cooling_ratio = std::atof(optarg);
+            break;
+
+        case '?': // getopt_long already printed an error
+        default:
+            print_help(argv[0]);
+            return 1;
+        }
+    }
+
     unsigned int n;
     cin >> n;
 
