@@ -40,7 +40,7 @@ extern "C"
 
     void free_problem(problem_t *problem);
 
-    void evolve(problem_t *problem, uint32 num_threads);
+    void evolve(problem_t *problem, uint32 num_threads, uint8 monitor, double C);
 
     void reset(problem_t *problem);
 

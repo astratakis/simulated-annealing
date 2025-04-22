@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        evolve(&problem, num_threads);
+        evolve(&problem, num_threads, (monitor ? 1 : 0), C);
     }
 
     free(h);

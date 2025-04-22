@@ -78,7 +78,7 @@ void *step(void *arg)
     return NULL;
 }
 
-void evolve(problem_t *problem, uint32 num_threads)
+void evolve(problem_t *problem, uint32 num_threads, uint8 monitor, double C)
 {
     if (num_threads > problem->num_nodes)
     {
@@ -98,40 +98,52 @@ void evolve(problem_t *problem, uint32 num_threads)
         args[i].to = (i + 1) * (problem->num_nodes / num_threads);
     }
 
-    for (unsigned int i = 0; i < num_threads; i++)
+    for (unsigned int i = 0; i < problem->max_iterations; i++)
     {
-        rc = pthread_create(&threads[i],
-                            NULL,
-                            worker,
-                            &args[i]);
-        if (rc != 0)
+        if (monitor == 1)
         {
-            fprintf(stderr, "pthread_create() failed for thread %d (code %d)\n", i, rc);
-            exit(1);
+            fprintf(stdout, "\r");
+            fprintf(stdout, "Running iteration %u/%u ...", i + 1, problem->max_iterations);
+        }
+        for (unsigned int i = 0; i < num_threads; i++)
+        {
+            rc = pthread_create(&threads[i],
+                                NULL,
+                                worker,
+                                &args[i]);
+            if (rc != 0)
+            {
+                fprintf(stderr, "pthread_create() failed for thread %d (code %d)\n", i, rc);
+                exit(1);
+            }
+        }
+
+        for (unsigned int i = 0; i < num_threads; i++)
+        {
+            pthread_join(threads[i], NULL);
+        }
+
+        for (unsigned int i = 0; i < num_threads; i++)
+        {
+            rc = pthread_create(&threads[i],
+                                NULL,
+                                step,
+                                &args[i]);
+            if (rc != 0)
+            {
+                fprintf(stderr, "pthread_create() failed for thread %d (code %d)\n", i, rc);
+                exit(1);
+            }
+        }
+
+        for (unsigned int i = 0; i < num_threads; i++)
+        {
+            pthread_join(threads[i], NULL);
         }
     }
-
-    for (unsigned int i = 0; i < num_threads; i++)
+    if (monitor)
     {
-        pthread_join(threads[i], NULL);
-    }
-
-    for (unsigned int i = 0; i < num_threads; i++)
-    {
-        rc = pthread_create(&threads[i],
-                            NULL,
-                            step,
-                            &args[i]);
-        if (rc != 0)
-        {
-            fprintf(stderr, "pthread_create() failed for thread %d (code %d)\n", i, rc);
-            exit(1);
-        }
-    }
-
-    for (unsigned int i = 0; i < num_threads; i++)
-    {
-        pthread_join(threads[i], NULL);
+        fprintf(stdout, "\n");
     }
 }
 
@@ -160,10 +172,12 @@ void reset(problem_t *problem)
     }
 }
 
-void state(problem_t *problem, char *string) {
+void state(problem_t *problem, char *string)
+{
     memset(string, 0, problem->num_nodes);
 
-    for (unsigned int i=0; i<problem->num_nodes; i++) {
+    for (unsigned int i = 0; i < problem->num_nodes; i++)
+    {
         string[i] = 0x30 + problem->graph.nodes[i];
     }
 }
