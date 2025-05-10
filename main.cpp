@@ -3,8 +3,11 @@
 #include <cstring>
 #include "annealing.h"
 #include <getopt.h>
+#include <fstream>
 
 using namespace std;
+
+#define stream (from_file ? in : cin)
 
 void print_help(const char *progname)
 {
@@ -42,13 +45,13 @@ void print_ising(double *h, double *J, unsigned int n)
 
 int main(int argc, char *argv[])
 {
-
-    std::string input_file;
-    std::string output_file;
+    string input_file;
+    string output_file;
     int num_threads = 1;
     bool normalize = false;
     bool monitor = false;
     bool to_file = false;
+    bool from_file = false;
     bool gpu = false;
     int gpu_blocks = 0;
     int gpu_threads = 0;
@@ -78,6 +81,7 @@ int main(int argc, char *argv[])
 
         case 'f':
             input_file = optarg;
+            from_file = true;
             break;
 
         case 't':
@@ -94,7 +98,6 @@ int main(int argc, char *argv[])
             break;
 
         case 'g':
-            // parse two integers: blocks and threads per block
             gpu = true;
             gpu_blocks = std::atoi(optarg);
             if (optind < argc && argv[optind][0] != '-')
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                std::cerr << "Error: --gpu requires two arguments.\n";
+                cerr << "Error: --gpu requires two arguments.\n";
                 return 1;
             }
             break;
@@ -120,15 +123,27 @@ int main(int argc, char *argv[])
             cooling_ratio = std::atof(optarg);
             break;
 
-        case '?': // getopt_long already printed an error
+        case '?':
         default:
             print_help(argv[0]);
             return 1;
         }
     }
 
+    ifstream in;
+
+    if (from_file)
+    {
+        in.open(input_file);
+        if (!in)
+        {
+            cerr << "Error: could not open " << input_file << endl;
+            return 1;
+        }
+    }
+
     unsigned int n;
-    cin >> n;
+    stream >> n;
 
     double *Q = (double *)malloc(n * n * sizeof(double));
 
@@ -136,7 +151,7 @@ int main(int argc, char *argv[])
     {
         for (unsigned int j = 0; j < n; j++)
         {
-            cin >> Q[i * n + j];
+            stream >> Q[i * n + j];
         }
     }
 
@@ -210,13 +225,22 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (num_threads > n)
+    {
+        fprintf(stderr, "Cannot spawn more threads than nodes...\n");
+        exit(EXIT_FAILURE);
+    }
+
     problem_t problem = initialize_problem(h, J, n, 100.0, cooling_ratio, 1.0, max_iter);
 
     if (gpu)
     {
+        fprintf(stderr, "Not yet implemented...\n");
+        exit(EXIT_FAILURE);
     }
     else
     {
+        fprintf(stderr, "Running evolution...");
         evolve(&problem, num_threads, (monitor ? 1 : 0), C);
     }
 

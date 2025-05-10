@@ -80,12 +80,6 @@ void *step(void *arg)
 
 void evolve(problem_t *problem, uint32 num_threads, uint8 monitor, double C)
 {
-    if (num_threads > problem->num_nodes)
-    {
-        fprintf(stderr, "Cannot spawn more threads than nodes...\n");
-        exit(EXIT_FAILURE);
-    }
-
     pthread_t threads[num_threads];
     thread_args_t args[num_threads];
     int rc;
@@ -100,50 +94,7 @@ void evolve(problem_t *problem, uint32 num_threads, uint8 monitor, double C)
 
     for (unsigned int i = 0; i < problem->max_iterations; i++)
     {
-        if (monitor == 1)
-        {
-            fprintf(stdout, "\r");
-            fprintf(stdout, "Running iteration %u/%u ...", i + 1, problem->max_iterations);
-        }
-        for (unsigned int i = 0; i < num_threads; i++)
-        {
-            rc = pthread_create(&threads[i],
-                                NULL,
-                                worker,
-                                &args[i]);
-            if (rc != 0)
-            {
-                fprintf(stderr, "pthread_create() failed for thread %d (code %d)\n", i, rc);
-                exit(1);
-            }
-        }
-
-        for (unsigned int i = 0; i < num_threads; i++)
-        {
-            pthread_join(threads[i], NULL);
-        }
-
-        for (unsigned int i = 0; i < num_threads; i++)
-        {
-            rc = pthread_create(&threads[i],
-                                NULL,
-                                step,
-                                &args[i]);
-            if (rc != 0)
-            {
-                fprintf(stderr, "pthread_create() failed for thread %d (code %d)\n", i, rc);
-                exit(1);
-            }
-        }
-
-        for (unsigned int i = 0; i < num_threads; i++)
-        {
-            pthread_join(threads[i], NULL);
-        }
-    }
-    if (monitor)
-    {
-        fprintf(stdout, "\n");
+        printf("%u num threads: %u\n", i, num_threads);
     }
 }
 
