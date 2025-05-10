@@ -240,12 +240,19 @@ int main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "Running evolution...");
         evolve(&problem, num_threads, (monitor ? 1 : 0), C);
     }
 
     free(h);
     free(J);
+
+    char *string = (char *)malloc(2 * n);
+
+    state(&problem, string, 32);
+
+    cout << string << endl;
+
+    free(string);
 
     return 0;
 }
